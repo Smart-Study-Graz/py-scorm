@@ -1,2 +1,4 @@
+import os
+
 def test():
-    print("test")
+    print(os.listdir(os.path.join(__file__, '..', 'data')))
