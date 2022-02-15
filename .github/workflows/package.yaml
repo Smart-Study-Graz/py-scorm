@@ -6,10 +6,10 @@ on:
   pull_request:
     branches: [ 'master', 'develop', 'feature/*' ]
   push:
-    branches: ['feature/*']
+    branches: [ 'feature/*' ]
 
 jobs:
-    publish:
+  publish:
     name: Build and publish Python distribution
     runs-on: ubuntu-latest
     steps:
