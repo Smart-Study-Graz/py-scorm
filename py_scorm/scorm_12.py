@@ -86,6 +86,11 @@ class Resource(ResourceBase):
 
         return resource
 
+    def _get_files(self):
+        files = self._files
+        [files.extend(f._get_files()) for f in self._dependencies]
+        return files
+
 class SharedResource(ResourceBase):
     _scormtype = 'asset'
 
@@ -188,4 +193,3 @@ class Scorm12():
 
                 if not os.path.exists(target_path):    
                     shutil.copy(source_path, target_path)
-
