@@ -1,1 +1,1 @@
-include py_scorm/data/
+recursive-include py_scorm/data *
