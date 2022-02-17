@@ -6,7 +6,5 @@ setup(
   packages=find_packages('.'),
   install_requires=[
     ],
-  package_data={
-    'py_scorm': ['data/*']
-  }
+  include_package_data=True,
 )
