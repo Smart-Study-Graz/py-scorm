@@ -47,7 +47,7 @@ class ResourceBase():
             'identifier': self._identifier_ref, 
             'type': 'webcontent',
             'adlcp:scormtype': self._scormtype,
-            'href': self.__relative(self._files[0]['target'])
+            'href': self._files[0]['target']
         })
 
         for file in self._files:
@@ -60,7 +60,7 @@ class ResourceBase():
 
     def __relative(self, file):
         path = os.path.basename(file)
-        return os.path.join(self._dst_path, path)
+        return pathlib.Path(os.path.join(self._dst_path, path)).as_posix()
 
 
 class Resource(ResourceBase):
