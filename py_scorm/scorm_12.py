@@ -6,7 +6,7 @@ import shutil
 
 
 
-_template_path = os.path.join(__file__, '..', 'data', 'scorm_12')
+_template_path = os.path.join(os.path.realpath(__file__), '..', 'data', 'scorm_12')
 
 ET.register_namespace('', 'http://www.imsproject.org/xsd/imscp_rootv1p1p2')
 ET.register_namespace('adlcp', 'http://www.adlnet.org/xsd/adlcp_rootv1p2')
