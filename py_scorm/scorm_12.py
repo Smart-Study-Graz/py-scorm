@@ -43,6 +43,9 @@ class ResourceBase():
         return item
 
     def _get_resource(self):
+        if len(self._files) == 0:
+            raise Exception('Cannot use resource with zero files.')
+            
         resource = ET.Element('resource', { 
             'identifier': self._identifier_ref, 
             'type': 'webcontent',
