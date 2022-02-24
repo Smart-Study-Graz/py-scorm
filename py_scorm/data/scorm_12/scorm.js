@@ -44,12 +44,12 @@ const SCORM_NO_ERROR = '0';
 
 const SCORM_LESSON_STATUS = 'cmi.core.lesson_status';
 const SCORM_LESSON_STATUS_CHOICES = {
-    passed          = 'passed',
-    completed       = 'completed',
-    failed          = 'failed',
-    incomplete      = 'incomplete',
-    browsed         = 'browsed',
-    notAttempted    = 'notAttempted',
+    passed          : 'passed',
+    completed       : 'completed',
+    failed          : 'failed',
+    incomplete      : 'incomplete',
+    browsed         : 'browsed',
+    notAttempted    : 'notAttempted',
 }
 
 
@@ -61,10 +61,10 @@ const SCORM_LESSON_LOCATION = 'cmi.core.lesson_location';
 
 const SCORM_EXIT = 'cmi.core.exit';
 const SCORM_EXIT_CHOICES = {
-    timeOut     = 'time-out',
-    suspend     = 'suspend',
-    logout      = 'logout',
-    unknown     = ''
+    timeOut     : 'time-out',
+    suspend     : 'suspend',
+    logout      : 'logout',
+    unknown     : ''
 }
 
 var _finishCalled = false;
