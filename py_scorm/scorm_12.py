@@ -125,13 +125,22 @@ class Scorm12():
             resource.add_dependency(self._shared)
         self._resources.append(resource)
 
-    def export(self, target_folder) -> None:
+    def export(self, target_folder, make_zip=False) -> None:
         if not os.path.exists(target_folder):
             raise OSError('Folder %s does not exist' % target_folder)
 
+        if make_zip:
+            original_folder = target_folder
+            target_folder = os.path.join(target_folder, 'scorm')
+            os.makedirs(target_folder, exist_ok=True)
+        
         self.__write_scorm_files(target_folder)
         self.__write_manifest(target_folder)
         self.__copy_resource_files(target_folder)
+
+        if make_zip:
+            shutil.make_archive(os.path.join(original_folder, self._name), 'zip', target_folder)
+            shutil.rmtree(target_folder, ignore_errors=True)
 
     def __write_scorm_files(self, target_folder):
         
