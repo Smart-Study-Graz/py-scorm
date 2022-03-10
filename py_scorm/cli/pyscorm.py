@@ -18,7 +18,7 @@ def cli(org_name, name, files, target_dir):
     for f in files[0:]:
         module.add_file(f)
 
-    course.add_resource(module)
+    course.add_resource(module, True)
 
     course.export(target_dir, True)
 
