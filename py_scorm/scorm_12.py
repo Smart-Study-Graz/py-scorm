@@ -1,5 +1,5 @@
 from __future__ import annotations
-import xml.etree.ElementTree as ET
+from lxml import etree
 import os
 import pathlib
 import shutil
@@ -8,9 +8,9 @@ import shutil
 
 _template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'scorm_12')
 
-ET.register_namespace('', 'http://www.imsproject.org/xsd/imscp_rootv1p1p2')
-ET.register_namespace('adlcp', 'http://www.adlnet.org/xsd/adlcp_rootv1p2')
-ET.register_namespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+# ET.register_namespace('', 'http://www.imsproject.org/xsd/imscp_rootv1p1p2')
+etree.register_namespace('adlcp', 'http://www.adlnet.org/xsd/adlcp_rootv1p2')
+# ET.register_namespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance')
 
 
 class ResourceBase():
@@ -20,11 +20,11 @@ class ResourceBase():
     def __init__(self, name, dst_path: str | None = None):
         self._name = name
         self._identifier = 'item_' + name.replace(' ', '_')
-        self._identifier_ref = 'resource_' + name.replace(' ', '_')
+        self.identifier_ref = 'resource_' + name.replace(' ', '_')
         self._files = []
 
         if dst_path is None:
-            dst_path = self._identifier_ref
+            dst_path = self.identifier_ref
         self._dst_path = dst_path
 
     def add_file(self, file: str):
@@ -33,12 +33,12 @@ class ResourceBase():
           'target': self.__relative(file),
         })
 
-    def _get_item(self) -> ET.Element:
-        item = ET.Element('item', 
-            { 'identifier': self._identifier, 'identifierref': self._identifier_ref, 'isvisible': 'true' }
+    def _get_item(self) -> etree.Element:
+        item = etree.Element('item', 
+            { 'identifier': self._identifier, 'identifierref': self.identifier_ref, 'isvisible': 'true' }
         )
 
-        ET.SubElement(item, 'title').text = self._name
+        etree.SubElement(item, 'title').text = self._name
 
         return item
 
@@ -46,15 +46,16 @@ class ResourceBase():
         if len(self._files) == 0:
             raise Exception('Cannot use resource with zero files.')
             
-        resource = ET.Element('resource', { 
-            'identifier': self._identifier_ref, 
+        resource = etree.Element('resource', { 
+            'identifier': self.identifier_ref, 
             'type': 'webcontent',
-            'adlcp:scormtype': self._scormtype,
+            #'adlcp:scormType': self._scormtype,
+            '{http://www.adlnet.org/xsd/adlcp_rootv1p2}scormType': self._scormtype,
             'href': self._files[0]['target']
         })
 
         for file in self._files:
-            ET.SubElement(resource, 'file', { 'href' : pathlib.Path(file['target']).as_posix()})
+            etree.SubElement(resource, 'file', { 'href' : pathlib.Path(file['target']).as_posix()})
 
         return resource
 
@@ -82,10 +83,10 @@ class Resource(ResourceBase):
     def _get_dependencies(self):
         return self._dependencies
     
-    def _get_resource(self) -> ET.Element:
+    def _get_resource(self) -> etree.Element:
         resource = super()._get_resource()
         for dependency in self._dependencies:
-            ET.SubElement(resource, 'dependency', { 'identifierref': dependency._identifier_ref })
+            etree.SubElement(resource, 'dependency', { 'identifierref': dependency.identifier_ref })
 
         return resource
 
@@ -108,14 +109,31 @@ class SharedResource(ResourceBase):
 
 class Scorm12():
 
-    def __init__(self, name: str):
-        self._name = name
+    def __init__(self, path: str = _template_path):
+        self._name = None
         self._organization_name = None
         self._resources = []
+        self._manifest = os.path.join(path, 'imsmanifest.xml')
 
-        # Create the shared resource:
+        #if path == _template_path:
         self._shared = SharedResource('common', 'common')
         self._shared.add_file(os.path.join(_template_path, 'scorm.js'))
+        
+
+        # Create the shared resource:
+        #self._shared = SharedResource('common', 'common')
+        #self._shared.add_file(os.path.join(_template_path, 'scorm.js'))
+
+    # def __init__(self, name: str):
+    #     self._name = name
+    #     self._organization_name = None
+    #     self._resources = []
+
+    #     # Create the shared resource:
+         
+
+    def set_name(self, name: str) -> None:
+        self._name = name
 
     def set_organization(self, name: str) -> None:
         self._organization_name = name
@@ -165,18 +183,20 @@ class Scorm12():
         )
 
     def __write_manifest(self, target_folder):
-        ims_manifest = ET.parse(os.path.join(_template_path, 'imsmanifest.xml'))
+        ims_manifest = etree.parse(self._manifest)
         ims_manifest_root = ims_manifest.getroot()
 
         ims_organizations = ims_manifest_root.find('{*}organizations')
         ims_resources = ims_manifest_root.find('{*}resources')
-
+        
         # set course title
-        ims_organizations.find('{*}organization').find('{*}title').text = self._name
+        if self._name is not None:
+            ims_organizations.find('{*}organization').find('{*}title').text = self._name
 
         # set organization title
-        ims_organizations.attrib['default'] = self._organization_name
-        ims_organizations.find('{*}organization').attrib['identifier'] = self._organization_name
+        if self._organization_name is not None:
+            ims_organizations.attrib['default'] = self._organization_name
+            ims_organizations.find('{*}organization').attrib['identifier'] = self._organization_name
 
         # add resources:
         dependencies = set()
@@ -187,11 +207,16 @@ class Scorm12():
             ims_resources.append(resource._get_resource())
 
         for dependency in dependencies:
-            ims_resources.append(dependency._get_resource())
+            resource = dependency._get_resource()
+            if len(ims_resources.xpath(f'//*[@identifier="{dependency.identifier_ref}"]')) == 0:
+                ims_resources.append(resource)
 
-        ET.indent(ims_manifest, space="\t", level=0)
+        etree.indent(ims_manifest, space="\t", level=0)
 
-        ims_manifest.write(os.path.join(target_folder, 'imsmanifest.xml'))
+        manifest_target = os.path.join(target_folder, 'imsmanifest.xml')
+        if os.path.exists(manifest_target):
+            os.remove(manifest_target)
+        ims_manifest.write(manifest_target, xml_declaration=True)
 
     def __copy_resource_files(self, target_folder: str):
         for resource in self._resources:
