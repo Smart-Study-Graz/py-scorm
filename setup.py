@@ -5,7 +5,8 @@ setup(
   name='py_scorm',
   packages=find_packages(),
   install_requires=[
-    'click'
+    'click==8.1.13',
+    'lxml==4.9.1'
     ],
   include_package_data=True,
   entry_points={
