@@ -21,16 +21,15 @@ def create(org_name, name, target_dir):
     course = Scorm12()
     course.set_name(name)
     course.set_organization(org_name)
-    course.export(target_dir, False)
+    course.write(target_dir)
 
 
-@cli.command()  # @cli, not @click!
+@cli.command()
 @click.option('-p', '--path', default='.')
 @click.option('-t', '--target_dir', default=None)
 @click.option('-n', '--name', required=True)
-@click.option('-z', '--zip', default=True)
 @click.argument('files', nargs=-1, type=click.Path(), required=True)
-def append(path, target_dir, name, files, zip):
+def append(path, target_dir, name, files):
     click.echo('Appending resource to course')
 
     if target_dir is None:
@@ -44,7 +43,19 @@ def append(path, target_dir, name, files, zip):
 
     course.add_resource(module, True)
     
-    course.export(path, zip)
+    course.write(target_dir)
+
+@cli.command()
+@click.option('-p', '--path', default='.')
+@click.option('-t', '--target_dir', default=None)
+def export(path, target_dir):
+    click.echo('Appending resource to course')
+
+    if target_dir is None:
+        target_dir = path
+
+    course = Scorm12(path)   
+    course.export(target_dir)
 
 if __name__ == '__main__':
     cli()

@@ -114,10 +114,17 @@ class Scorm12():
         self._organization_name = None
         self._resources = []
         self._manifest = os.path.join(path, 'imsmanifest.xml')
+        self._path = path
 
-        #if path == _template_path:
+        
         self._shared = SharedResource('common', 'common')
         self._shared.add_file(os.path.join(_template_path, 'scorm.js'))
+
+        if path != _template_path:
+            ims_manifest = etree.parse(self._manifest)
+            ims_manifest_root = ims_manifest.getroot()
+            ims_organizations = ims_manifest_root.find('{*}organizations')
+            self._name = ims_organizations.find('{*}organization').find('{*}title').text
         
 
         # Create the shared resource:
@@ -143,22 +150,19 @@ class Scorm12():
             resource.add_dependency(self._shared)
         self._resources.append(resource)
 
-    def export(self, target_folder, make_zip=False) -> None:
+    def write(self, target_folder) -> None:
         if not os.path.exists(target_folder):
             raise OSError('Folder %s does not exist' % target_folder)
 
-        if make_zip:
-            original_folder = target_folder
-            target_folder = os.path.join(target_folder, 'scorm')
-            os.makedirs(target_folder, exist_ok=True)
+        
         
         self.__write_scorm_files(target_folder)
         self.__write_manifest(target_folder)
         self.__copy_resource_files(target_folder)
+    
 
-        if make_zip:
-            shutil.make_archive(os.path.join(original_folder, self._name), 'zip', target_folder)
-            shutil.rmtree(target_folder, ignore_errors=True)
+    def export(self, target_folder):
+        shutil.make_archive(os.path.join(target_folder, self._name), 'zip', self._path)
 
     def __write_scorm_files(self, target_folder):
         
