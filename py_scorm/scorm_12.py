@@ -20,7 +20,7 @@ class ResourceBase():
     def __init__(self, name, dst_path: str | None = None):
         self._name = name
         self._identifier = 'item_' + name.replace(' ', '_')
-        self.identifier_ref = 'resource_' + name.replace(' ', '_')
+        self.identifier_ref = name.replace(' ', '_')
         self._files = []
 
         if dst_path is None:

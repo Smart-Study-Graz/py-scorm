@@ -47,13 +47,10 @@ def append(path, target_dir, name, files):
 
 @cli.command()
 @click.option('-p', '--path', default='.')
-@click.option('-t', '--target_dir', default=None)
+@click.option('-t', '--target_dir', required=True)
 def export(path, target_dir):
     click.echo('Appending resource to course')
-
-    if target_dir is None:
-        target_dir = path
-
+    
     course = Scorm12(path)   
     course.export(target_dir)
 
