@@ -28,8 +28,9 @@ def create(org_name, name, target_dir):
 @click.option('-p', '--path', default='.')
 @click.option('-t', '--target_dir', default=None)
 @click.option('-n', '--name', required=True)
+@click.option('-z', '--zip', default=True)
 @click.argument('files', nargs=-1, type=click.Path(), required=True)
-def append(path, target_dir, name, files):
+def append(path, target_dir, name, files, zip):
     click.echo('Appending resource to course')
 
     if target_dir is None:
@@ -43,7 +44,7 @@ def append(path, target_dir, name, files):
 
     course.add_resource(module, True)
     
-    course.export(path, False)
+    course.export(path, zip)
 
 if __name__ == '__main__':
     cli()
