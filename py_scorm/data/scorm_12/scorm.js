@@ -169,7 +169,7 @@ function ScormCommit(){
     
     if (_initialized == false || _finishCalled == true){return;}
     
-    result = API.ScormCommit();
+    result = API.LMSCommit();
     
     if (result == SCORM_FALSE){
         var errorNumber = API.LMSGetLastError();
